@@ -1,5 +1,7 @@
 {
+  "name": "clim-airton",
+  "version": "1.0.0",
   "dependencies": {
-    "@tuya/tuya-connector-nodejs": "^1.0.8"
+    "@tuya/tuya-connector-nodejs": "latest"
   }
 }
