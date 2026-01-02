@@ -3,45 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airton Pro Control</title>
+    <title>Airton Smart Control</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        :root { --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 360px; text-align: center; margin-top: 10px; }
+        :root { 
+            --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; 
+            --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; 
+        }
         
-        /* Température */
-        .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 5px 0; line-height: 1; }
-        .temp-room { font-size: 1rem; color: var(--soft); margin-bottom: 20px; font-weight: 500; }
-        
-        .temp-controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
-        .btn-circle { width: 65px; height: 65px; border-radius: 50%; border: none; background: #f8f9fa; font-size: 28px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; }
-        .btn-circle:active { transform: scale(0.9); background: #e9ecef; }
+        /* Transitions de couleurs dynamiques */
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); color: var(--text); 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 20px; margin: 0; transition: background-color 0.8s ease;
+        }
 
-        /* Grilles de commandes */
+        /* Classes de modes */
+        body.mode-cold { background-color: #e3f2fd; }
+        body.mode-heat { background-color: #fbe9e7; }
+        body.mode-auto { background-color: #f0f3f7; }
+        body.mode-wet { background-color: #e0f2f1; }
+
+        .card { 
+            background: var(--card); padding: 25px; border-radius: 24px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; 
+            max-width: 360px; text-align: center; margin-top: 10px; 
+        }
+        
+        .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 5px 0; line-height: 1; transition: color 0.5s; }
+        body.mode-cold .temp-main { color: #1976d2; }
+        body.mode-heat .temp-main { color: #d84315; }
+
+        .temp-room { font-size: 1.1rem; color: var(--soft); margin-bottom: 20px; font-weight: 600; }
+        .temp-controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
+        
+        .btn-circle { 
+            width: 65px; height: 65px; border-radius: 50%; border: none; 
+            background: #f8f9fa; font-size: 28px; cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
         .btn-on { background: var(--success); color: white; }
         .btn-off { background: var(--danger); color: white; }
         .btn-opt { background: #f1f3f5; color: var(--text); border: 1px solid #e9ecef; }
-        .btn:active { transform: translateY(2px); opacity: 0.9; }
 
-        /* Statut et Config */
-        #status-msg { font-size: 0.75rem; color: var(--soft); margin-bottom: 10px; height: 15px; }
+        #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; font-weight: 500; }
         #config-section { display: none; }
-        .input-group { text-align: left; margin-bottom: 10px; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
-        .settings-link { background: none; border: none; color: var(--soft); margin-top: 20px; font-size: 0.8rem; text-decoration: underline; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        .settings-link { background: none; border: none; color: var(--soft); margin-top: 20px; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="status-msg">Prêt</div>
+    <div id="status-msg">Chargement...</div>
 
     <div class="card" id="main-ui">
         <div class="temp-room" id="room-val">Pièce : --°C</div>
-        <div class="temp-main" id="set-val">20°C</div>
+        <div class="temp-main" id="set-val">--°C</div>
         <div style="font-size: 0.8rem; color: var(--soft); margin-bottom: 15px;">Consigne</div>
         
         <div class="temp-controls">
@@ -67,19 +89,19 @@
             <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)">✨</button>
         </div>
 
-        <button class="settings-link" onclick="toggleView(true)">⚙️ Paramètres de connexion</button>
+        <button class="settings-link" onclick="toggleView(true)">⚙️ Paramètres</button>
     </div>
 
     <div class="card" id="config-section">
-        <h3>Configuration Tuya</h3>
-        <div class="input-group"><input type="text" id="cfg-id" placeholder="Access ID"></div>
-        <div class="input-group"><input type="password" id="cfg-sec" placeholder="Access Secret"></div>
-        <div class="input-group"><input type="text" id="cfg-dev" placeholder="Device ID"></div>
+        <h3>Configuration</h3>
+        <input type="text" id="cfg-id" placeholder="Access ID">
+        <input type="password" id="cfg-sec" placeholder="Access Secret">
+        <input type="text" id="cfg-dev" placeholder="Device ID">
         <button class="btn btn-on" style="width:100%" onclick="saveConfig()">ENREGISTRER</button>
     </div>
 
     <script>
-        let tempSet = 200; // 20.0°C
+        let tempSet = 200;
 
         function toggleView(showConfig) {
             document.getElementById('main-ui').style.display = showConfig ? 'none' : 'block';
@@ -90,51 +112,51 @@
             localStorage.setItem('tuya_id', document.getElementById('cfg-id').value);
             localStorage.setItem('tuya_secret', document.getElementById('cfg-sec').value);
             localStorage.setItem('tuya_device', document.getElementById('cfg-dev').value);
-            location.reload(); //
+            location.reload();
         }
 
         async function run(action, code, value) {
             const msg = document.getElementById('status-msg');
-            msg.innerText = "Communication...";
+            msg.innerText = "Envoi...";
             
             const payload = {
-                action: action,
-                accessId: localStorage.getItem('tuya_id'),
+                action: action, accessId: localStorage.getItem('tuya_id'),
                 accessSecret: localStorage.getItem('tuya_secret'),
                 deviceId: localStorage.getItem('tuya_device'),
-                code: code,
-                value: value
+                code: code, value: value
             };
 
             try {
                 const res = await fetch('/api/control', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                
                 if (data.success) {
-                    msg.innerText = "C'est fait !";
+                    msg.innerText = "Confirmé";
                     if(action === 'getStatus') updateUI(data.result);
-                } else {
-                    msg.innerText = "Erreur: " + data.msg;
-                }
+                } else { msg.innerText = "Erreur: " + data.msg; }
             } catch (e) { msg.innerText = "Erreur réseau"; }
-            setTimeout(() => msg.innerText = "Prêt", 3000);
+            setTimeout(() => msg.innerText = "Prêt", 2000);
         }
 
         function updateUI(statusArray) {
-            // Lecture de la température pièce (ex: 22 => 22°C)
+            // Températures
             const room = statusArray.find(s => s.code === 'temp_current');
             if(room) document.getElementById('room-val').innerText = "Pièce : " + room.value + "°C";
             
-            // Lecture consigne (ex: 200 => 20°C)
             const set = statusArray.find(s => s.code === 'temp_set');
             if(set) {
                 tempSet = set.value;
                 document.getElementById('set-val').innerText = (tempSet / 10) + "°C";
             }
+
+            // Couleurs de fond dynamiques
+            const mode = statusArray.find(s => s.code === 'mode');
+            const heat = statusArray.find(s => s.code === 'heat');
+            document.body.className = ''; 
+            if (heat && heat.value === true) document.body.classList.add('mode-heat');
+            else if (mode) document.body.classList.add('mode-' + mode.value);
         }
 
         function adjustTemp(delta) {
@@ -145,12 +167,8 @@
             run('sendCommand', 'temp_set', tempSet);
         }
 
-        // Au démarrage
-        if(!localStorage.getItem('tuya_id')) {
-            toggleView(true);
-        } else {
-            run('getStatus'); // Charge les températures réelles
-        }
+        if(!localStorage.getItem('tuya_id')) toggleView(true);
+        else run('getStatus');
     </script>
 </body>
 </html>
