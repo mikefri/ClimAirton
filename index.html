@@ -55,6 +55,11 @@
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'wet')">💧 Sec</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'heat', true)">🔥 Chaud</button>
         </div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button class="btn btn-opt" onclick="run('sendCommand', 'light', true)" title="Lumière">💡 Light</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'sleep', true)" title="Sommeil">🌙 Sleep</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)" title="Santé">✨ Health</button>
+        </div>
         <button style="background:none; border:none; color:var(--soft); cursor:pointer; margin-top:15px;" onclick="toggleView(true)">⚙️ Paramètres</button>
     </div>
 
