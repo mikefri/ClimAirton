@@ -1,11 +1,9 @@
 const { TuyaContext } = require('@tuya/tuya-connector-nodejs');
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ msg: 'Méthode non autorisée' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ msg: 'Méthode non autorisée' });
 
-  const { accessId, accessSecret, deviceId, power } = req.body;
+  const { accessId, accessSecret, deviceId, code, value } = req.body;
 
   const tuya = new TuyaContext({
     baseUrl: 'https://openapi.tuyaeu.com',
@@ -18,9 +16,7 @@ export default async function handler(req, res) {
       path: `/v1.0/devices/${deviceId}/commands`,
       method: 'POST',
       body: {
-        "commands": [
-          { "code": "switch_1", "value": power }
-        ]
+        "commands": [{ "code": code, "value": value }]
       }
     });
     res.status(200).json(result);
