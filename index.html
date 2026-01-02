@@ -2,57 +2,81 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Airton Control</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        .btn { padding: 15px 30px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 10px; width: 80%; }
-        .btn-on { background: #4CAF50; color: white; }
-        .btn-off { background: #f44336; color: white; }
-        .config-input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
-        #config-section { display: none; } /* Caché si les clés existent */
+        :root { --bg: #f5f7fa; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+        .card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px; text-align: center; margin-top: 20px; }
+        h2 { margin-top: 0; font-weight: 600; font-size: 1.2rem; }
+        
+        /* Température */
+        .temp-display { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin: 10px 0; }
+        .temp-controls { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; }
+        .circle-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #eee; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .circle-btn:active { transform: scale(0.9); background: #ddd; }
+
+        /* Grille de boutons */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn-on { background: var(--success); color: white; }
+        .btn-off { background: var(--danger); color: white; }
+        .btn-mode { background: #ecf0f1; color: var(--text); }
+        .btn:active { opacity: 0.8; transform: translateY(2px); }
+
+        /* Configuration */
+        .config-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        #config-section { display: none; }
+        .settings-btn { background: none; border: none; color: #95a5a6; cursor: pointer; margin-top: 20px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <div class="card" id="main-ui">
-        <h2>Clim Airton</h2>
-        <div id="status">Chargement...</div>
-        <button class="btn btn-on" onclick="sendCommand(true)">ALLUMER</button>
-        <button class="btn btn-off" onclick="sendCommand(false)">ÉTEINDRE</button>
-        <hr>
-        <button onclick="showConfig()">⚙️ Paramètres</button>
+        <h2 id="device-name">Ma Clim Airton</h2>
+        
+        <div class="temp-display" id="temp-val">20°C</div>
+        
+        <div class="temp-controls">
+            <button class="circle-btn" onclick="updateTemp(-10)">-</button>
+            <button class="circle-btn" onclick="updateTemp(10)">+</button>
+        </div>
+
+        <div class="grid">
+            <button class="btn btn-on" onclick="callApi('switch', true)">ALLUMER</button>
+            <button class="btn btn-off" onclick="callApi('switch', false)">ÉTEINDRE</button>
+        </div>
+
+        <div class="grid">
+            <button class="btn btn-mode" onclick="callApi('mode', 'cold')">❄️ Froid</button>
+            <button class="btn btn-mode" onclick="callApi('mode', 'auto')">🔄 Auto</button>
+            <button class="btn btn-mode" onclick="callApi('heat', true)">🔥 Chaud</button>
+            <button class="btn btn-mode" onclick="callApi('light', true)">💡 Light</button>
+        </div>
+
+        <button class="settings-btn" onclick="showConfig()">⚙️ Paramètres de connexion</button>
     </div>
 
     <div class="card" id="config-section">
         <h3>Configuration Tuya</h3>
-        <input type="text" id="accessId" class="config-input" placeholder="Access ID">
-        <input type="password" id="accessSecret" class="config-input" placeholder="Access Secret">
-        <input type="text" id="deviceId" class="config-input" placeholder="Device ID">
-        <button class="btn btn-on" onclick="saveConfig()">SAUVEGARDER</button>
+        <p style="font-size: 0.8rem; color: #7f8c8d;">Entrez vos identifiants Cloud Tuya</p>
+        <input type="text" id="accId" class="config-input" placeholder="Access ID">
+        <input type="password" id="accSec" class="config-input" placeholder="Access Secret">
+        <input type="text" id="devId" class="config-input" placeholder="Device ID">
+        <button class="btn btn-on" style="width:100%; margin-top:10px;" onclick="saveSettings()">SAUVEGARDER</button>
     </div>
 
     <script>
-        // Fonction pour vérifier si les clés sont déjà en mémoire (Local Storage)
-        function checkConfig() {
-            const id = localStorage.getItem('tuya_id');
-            if (!id) {
-                document.getElementById('main-ui').style.display = 'none';
-                document.getElementById('config-section').style.display = 'block';
-            } else {
-                document.getElementById('status').innerText = "Appareil : " + id;
-            }
-        }
+        let currentSetpoint = 200; // 20.0°C
 
-        // Sauvegarde les clés dans l'appareil
-        function saveConfig() {
-            localStorage.setItem('tuya_id', document.getElementById('accessId').value);
-            localStorage.setItem('tuya_secret', document.getElementById('accessSecret').value);
-            localStorage.setItem('tuya_device', document.getElementById('deviceId').value);
-            location.reload(); // Recharge pour afficher la télécommande
+        // Vérification de la mémoire au chargement
+        function init() {
+            const storedId = localStorage.getItem('tuya_id');
+            if (!storedId) {
+                showConfig();
+            }
         }
 
         function showConfig() {
@@ -60,31 +84,46 @@
             document.getElementById('config-section').style.display = 'block';
         }
 
-        // Fonction qui appelle l'API Cloud
-async function sendCommand(power) {
-    const config = {
-        accessId: localStorage.getItem('tuya_id'),
-        accessSecret: localStorage.getItem('tuya_secret'),
-        deviceId: localStorage.getItem('tuya_device'),
-        power: power
-    };
+        function saveSettings() {
+            localStorage.setItem('tuya_id', document.getElementById('accId').value);
+            localStorage.setItem('tuya_secret', document.getElementById('accSec').value);
+            localStorage.setItem('tuya_device', document.getElementById('devId').value);
+            window.location.reload();
+        }
 
-    // On envoie les infos au serveur Vercel
-    const response = await fetch('/api/control', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-    });
+        // Gestion de la température (Échelle x10 pour Tuya)
+        function updateTemp(delta) {
+            currentSetpoint += delta;
+            if (currentSetpoint < 160) currentSetpoint = 160;
+            if (currentSetpoint > 300) currentSetpoint = 300;
+            document.getElementById('temp-val').innerText = (currentSetpoint / 10) + "°C";
+            callApi('temp_set', currentSetpoint);
+        }
 
-    const result = await response.json();
-    if(result.success) {
-        alert("Succès ! La clim a reçu l'ordre.");
-    } else {
-        alert("Erreur : " + result.msg);
-    }
-}
+        // Appel au serveur Vercel
+        async function callApi(code, value) {
+            const payload = {
+                accessId: localStorage.getItem('tuya_id'),
+                accessSecret: localStorage.getItem('tuya_secret'),
+                deviceId: localStorage.getItem('tuya_device'),
+                code: code,
+                value: value
+            };
 
-        checkConfig();
+            try {
+                const response = await fetch('/api/control', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (!result.success) console.error("Erreur Tuya:", result.msg);
+            } catch (err) {
+                console.error("Erreur réseau:", err);
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>
