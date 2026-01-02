@@ -3,115 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airton Control</title>
+    <title>Airton Pro Control</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        :root { --bg: #f5f7fa; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --disabled: #bdc3c7; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        .card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px; text-align: center; margin-top: 20px; position: relative; }
+        :root { --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 360px; text-align: center; margin-top: 10px; }
         
         /* Température */
-        .temp-display { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin: 10px 0; transition: opacity 0.3s; }
-        .temp-controls { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; }
-        .circle-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #eee; font-size: 24px; cursor: pointer; }
+        .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 5px 0; line-height: 1; }
+        .temp-room { font-size: 1rem; color: var(--soft); margin-bottom: 20px; font-weight: 500; }
         
-        /* Grille et Boutons */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 1rem; position: relative; }
+        .temp-controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
+        .btn-circle { width: 65px; height: 65px; border-radius: 50%; border: none; background: #f8f9fa; font-size: 28px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; }
+        .btn-circle:active { transform: scale(0.9); background: #e9ecef; }
+
+        /* Grilles de commandes */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
         .btn-on { background: var(--success); color: white; }
         .btn-off { background: var(--danger); color: white; }
-        .btn-mode { background: #ecf0f1; color: var(--text); }
-        
-        /* Animation de chargement */
-        .loading { opacity: 0.6; pointer-events: none; }
-        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; position: absolute; right: 10px; top: 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Status Bar */
-        #status-bar { font-size: 0.8rem; margin-bottom: 10px; color: var(--disabled); }
+        .btn-opt { background: #f1f3f5; color: var(--text); border: 1px solid #e9ecef; }
+        .btn:active { transform: translateY(2px); opacity: 0.9; }
 
-        /* Config */
-        .config-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        /* Statut et Config */
+        #status-msg { font-size: 0.75rem; color: var(--soft); margin-bottom: 10px; height: 15px; }
         #config-section { display: none; }
-        .settings-btn { background: none; border: none; color: #95a5a6; cursor: pointer; margin-top: 25px; }
+        .input-group { text-align: left; margin-bottom: 10px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        .settings-link { background: none; border: none; color: var(--soft); margin-top: 20px; font-size: 0.8rem; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="status-bar">Prêt</div>
+    <div id="status-msg">Prêt</div>
 
     <div class="card" id="main-ui">
-        <h2>Airton Pro</h2>
-        
-        <div class="temp-display" id="temp-val">20°C</div>
+        <div class="temp-room" id="room-val">Pièce : --°C</div>
+        <div class="temp-main" id="set-val">20°C</div>
+        <div style="font-size: 0.8rem; color: var(--soft); margin-bottom: 15px;">Consigne</div>
         
         <div class="temp-controls">
-            <button class="circle-btn" onclick="updateTemp(-10)">-</button>
-            <button class="circle-btn" onclick="updateTemp(10)">+</button>
+            <button class="btn-circle" onclick="adjustTemp(-10)">−</button>
+            <button class="btn-circle" onclick="adjustTemp(10)">+</button>
         </div>
 
         <div class="grid">
-            <button id="btn-switch-true" class="btn btn-on" onclick="callApi('switch', true)">
-                ON <div class="spinner"></div>
-            </button>
-            <button id="btn-switch-false" class="btn btn-off" onclick="callApi('switch', false)">
-                OFF <div class="spinner"></div>
-            </button>
+            <button class="btn btn-on" onclick="run('sendCommand', 'switch', true)">ALLUMER</button>
+            <button class="btn btn-off" onclick="run('sendCommand', 'switch', false)">ÉTEINDRE</button>
         </div>
 
         <div class="grid">
-            <button class="btn btn-mode" onclick="callApi('mode', 'cold')">❄️ Froid</button>
-            <button class="btn btn-mode" onclick="callApi('mode', 'auto')">🔄 Auto</button>
-            <button class="btn btn-mode" onclick="callApi('heat', true)">🔥 Chaud</button>
-            <button class="btn btn-mode" onclick="callApi('light', true)">💡 Light</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'cold')">❄️ Froid</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'auto')">🔄 Auto</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'wet')">💧 Sec</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'heat', true)">🔥 Chaud</button>
         </div>
 
-        <button class="settings-btn" onclick="showConfig()">⚙️ Paramètres</button>
+        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button class="btn btn-opt" onclick="run('sendCommand', 'light', true)">💡</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'sleep', true)">🌙</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)">✨</button>
+        </div>
+
+        <button class="settings-link" onclick="toggleView(true)">⚙️ Paramètres de connexion</button>
     </div>
 
     <div class="card" id="config-section">
-        <h3>Configuration</h3>
-        <input type="text" id="accId" class="config-input" placeholder="Access ID">
-        <input type="password" id="accSec" class="config-input" placeholder="Access Secret">
-        <input type="text" id="devId" class="config-input" placeholder="Device ID">
-        <button class="btn btn-on" style="width:100%" onclick="saveSettings()">SAUVEGARDER</button>
+        <h3>Configuration Tuya</h3>
+        <div class="input-group"><input type="text" id="cfg-id" placeholder="Access ID"></div>
+        <div class="input-group"><input type="password" id="cfg-sec" placeholder="Access Secret"></div>
+        <div class="input-group"><input type="text" id="cfg-dev" placeholder="Device ID"></div>
+        <button class="btn btn-on" style="width:100%" onclick="saveConfig()">ENREGISTRER</button>
     </div>
 
     <script>
-        let currentSetpoint = 200;
+        let tempSet = 200; // 20.0°C
 
-        function init() {
-            const id = localStorage.getItem('tuya_id');
-            if (!id) showConfig();
+        function toggleView(showConfig) {
+            document.getElementById('main-ui').style.display = showConfig ? 'none' : 'block';
+            document.getElementById('config-section').style.display = showConfig ? 'block' : 'none';
         }
 
-        function showConfig() {
-            document.getElementById('main-ui').style.display = 'none';
-            document.getElementById('config-section').style.display = 'block';
+        function saveConfig() {
+            localStorage.setItem('tuya_id', document.getElementById('cfg-id').value);
+            localStorage.setItem('tuya_secret', document.getElementById('cfg-sec').value);
+            localStorage.setItem('tuya_device', document.getElementById('cfg-dev').value);
+            location.reload(); //
         }
 
-        function saveSettings() {
-            localStorage.setItem('tuya_id', document.getElementById('accId').value);
-            localStorage.setItem('tuya_secret', document.getElementById('accSec').value);
-            localStorage.setItem('tuya_device', document.getElementById('devId').value);
-            location.reload();
-        }
-
-        function updateTemp(delta) {
-            currentSetpoint += delta;
-            if (currentSetpoint < 160) currentSetpoint = 160;
-            if (currentSetpoint > 300) currentSetpoint = 300;
-            document.getElementById('temp-val').innerText = (currentSetpoint / 10) + "°C";
-            callApi('temp_set', currentSetpoint);
-        }
-
-        async function callApi(code, value) {
-            const statusBar = document.getElementById('status-bar');
-            statusBar.innerText = "Envoi en cours...";
+        async function run(action, code, value) {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "Communication...";
             
-            // Animation sur le bouton cliqué (optionnel)
             const payload = {
+                action: action,
                 accessId: localStorage.getItem('tuya_id'),
                 accessSecret: localStorage.getItem('tuya_secret'),
                 deviceId: localStorage.getItem('tuya_device'),
@@ -120,24 +107,50 @@
             };
 
             try {
-                const response = await fetch('/api/control', {
+                const res = await fetch('/api/control', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
                 });
-                const result = await response.json();
+                const data = await res.json();
                 
-                if (result.success) {
-                    statusBar.innerText = "Commande effectuée avec succès";
-                    setTimeout(() => statusBar.innerText = "Prêt", 2000);
+                if (data.success) {
+                    msg.innerText = "C'est fait !";
+                    if(action === 'getStatus') updateUI(data.result);
                 } else {
-                    statusBar.innerText = "Erreur : " + result.msg;
+                    msg.innerText = "Erreur: " + data.msg;
                 }
-            } catch (err) {
-                statusBar.innerText = "Erreur de connexion";
+            } catch (e) { msg.innerText = "Erreur réseau"; }
+            setTimeout(() => msg.innerText = "Prêt", 3000);
+        }
+
+        function updateUI(statusArray) {
+            // Lecture de la température pièce (ex: 22 => 22°C)
+            const room = statusArray.find(s => s.code === 'temp_current');
+            if(room) document.getElementById('room-val').innerText = "Pièce : " + room.value + "°C";
+            
+            // Lecture consigne (ex: 200 => 20°C)
+            const set = statusArray.find(s => s.code === 'temp_set');
+            if(set) {
+                tempSet = set.value;
+                document.getElementById('set-val').innerText = (tempSet / 10) + "°C";
             }
         }
-        init();
+
+        function adjustTemp(delta) {
+            tempSet += delta;
+            if(tempSet < 160) tempSet = 160;
+            if(tempSet > 320) tempSet = 320;
+            document.getElementById('set-val').innerText = (tempSet / 10) + "°C";
+            run('sendCommand', 'temp_set', tempSet);
+        }
+
+        // Au démarrage
+        if(!localStorage.getItem('tuya_id')) {
+            toggleView(true);
+        } else {
+            run('getStatus'); // Charge les températures réelles
+        }
     </script>
 </body>
 </html>
