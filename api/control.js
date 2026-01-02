@@ -1,4 +1,4 @@
-const { TuyaContext } = require('@tuya/tuya-connector-nodejs');
+import { TuyaContext } from '@tuya/tuya-connector-nodejs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ msg: 'Méthode non autorisée' });
@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   });
 
   try {
-    // ACTION 1 : LIRE L'ÉTAT (Pour temp_current, mode actuel, etc.)
     if (action === 'getStatus') {
       const status = await tuya.request({
         path: `/v1.0/devices/${deviceId}/status`,
@@ -21,7 +20,6 @@ export default async function handler(req, res) {
       return res.status(200).json(status);
     }
 
-    // ACTION 2 : ENVOYER UNE COMMANDE (Pour switch, temp_set, mode...)
     if (action === 'sendCommand') {
       const result = await tuya.request({
         path: `/v1.0/devices/${deviceId}/commands`,
