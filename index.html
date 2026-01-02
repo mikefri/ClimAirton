@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airton Control</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        .btn { padding: 15px 30px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 10px; width: 80%; }
+        .btn-on { background: #4CAF50; color: white; }
+        .btn-off { background: #f44336; color: white; }
+        .config-input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
+        #config-section { display: none; } /* Caché si les clés existent */
+    </style>
+</head>
+<body>
+
+    <div class="card" id="main-ui">
+        <h2>Clim Airton</h2>
+        <div id="status">Chargement...</div>
+        <button class="btn btn-on" onclick="sendCommand(true)">ALLUMER</button>
+        <button class="btn btn-off" onclick="sendCommand(false)">ÉTEINDRE</button>
+        <hr>
+        <button onclick="showConfig()">⚙️ Paramètres</button>
+    </div>
+
+    <div class="card" id="config-section">
+        <h3>Configuration Tuya</h3>
+        <input type="text" id="accessId" class="config-input" placeholder="Access ID">
+        <input type="password" id="accessSecret" class="config-input" placeholder="Access Secret">
+        <input type="text" id="deviceId" class="config-input" placeholder="Device ID">
+        <button class="btn btn-on" onclick="saveConfig()">SAUVEGARDER</button>
+    </div>
+
+    <script>
+        // Fonction pour vérifier si les clés sont déjà en mémoire (Local Storage)
+        function checkConfig() {
+            const id = localStorage.getItem('tuya_id');
+            if (!id) {
+                document.getElementById('main-ui').style.display = 'none';
+                document.getElementById('config-section').style.display = 'block';
+            } else {
+                document.getElementById('status').innerText = "Appareil : " + id;
+            }
+        }
+
+        // Sauvegarde les clés dans l'appareil
+        function saveConfig() {
+            localStorage.setItem('tuya_id', document.getElementById('accessId').value);
+            localStorage.setItem('tuya_secret', document.getElementById('accessSecret').value);
+            localStorage.setItem('tuya_device', document.getElementById('deviceId').value);
+            location.reload(); // Recharge pour afficher la télécommande
+        }
+
+        function showConfig() {
+            document.getElementById('main-ui').style.display = 'none';
+            document.getElementById('config-section').style.display = 'block';
+        }
+
+        // Fonction qui appelle l'API Cloud
+        async function sendCommand(power) {
+            const id = localStorage.getItem('tuya_id');
+            const secret = localStorage.getItem('tuya_secret');
+            const device = localStorage.getItem('tuya_device');
+
+            alert("Appel API avec ID: " + id + "\nAction: " + (power ? "ON" : "OFF"));
+            // Ici, vous devrez faire le lien avec votre petit serveur Backend
+            // car le Cloud Tuya refuse les appels directs du navigateur pour sécurité.
+        }
+
+        checkConfig();
+    </script>
+</body>
+</html>
