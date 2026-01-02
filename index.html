@@ -5,62 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Airton Smart Control</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        :root { 
-            --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; 
-            --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; 
-        }
-        
-        /* Transitions de couleurs dynamiques */
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: var(--bg); color: var(--text); 
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 20px; margin: 0; transition: background-color 0.8s ease;
-        }
-
-        /* Classes de modes */
+        :root { --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; transition: background 0.8s; }
         body.mode-cold { background-color: #e3f2fd; }
         body.mode-heat { background-color: #fbe9e7; }
-        body.mode-auto { background-color: #f0f3f7; }
-        body.mode-wet { background-color: #e0f2f1; }
-
-        .card { 
-            background: var(--card); padding: 25px; border-radius: 24px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; 
-            max-width: 360px; text-align: center; margin-top: 10px; 
-        }
-        
-        .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 5px 0; line-height: 1; transition: color 0.5s; }
-        body.mode-cold .temp-main { color: #1976d2; }
-        body.mode-heat .temp-main { color: #d84315; }
-
+        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 360px; text-align: center; }
+        .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); line-height: 1; }
         .temp-room { font-size: 1.1rem; color: var(--soft); margin-bottom: 20px; font-weight: 600; }
         .temp-controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
-        
-        .btn-circle { 
-            width: 65px; height: 65px; border-radius: 50%; border: none; 
-            background: #f8f9fa; font-size: 28px; cursor: pointer; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-        }
-
+        .btn-circle { width: 65px; height: 65px; border-radius: 50%; border: none; background: #f8f9fa; font-size: 28px; cursor: pointer; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
         .btn-on { background: var(--success); color: white; }
         .btn-off { background: var(--danger); color: white; }
-        .btn-opt { background: #f1f3f5; color: var(--text); border: 1px solid #e9ecef; }
-
-        #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; font-weight: 500; }
+        .btn-opt { background: #f1f3f5; color: var(--text); }
+        #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; }
         #config-section { display: none; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
-        .settings-link { background: none; border: none; color: var(--soft); margin-top: 20px; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div id="status-msg">Chargement...</div>
-
     <div class="card" id="main-ui">
         <div class="temp-room" id="room-val">Pièce : --°C</div>
         <div class="temp-main" id="set-val">--°C</div>
@@ -70,26 +36,17 @@
             <button class="btn-circle" onclick="adjustTemp(-10)">−</button>
             <button class="btn-circle" onclick="adjustTemp(10)">+</button>
         </div>
-
         <div class="grid">
             <button class="btn btn-on" onclick="run('sendCommand', 'switch', true)">ALLUMER</button>
             <button class="btn btn-off" onclick="run('sendCommand', 'switch', false)">ÉTEINDRE</button>
         </div>
-
         <div class="grid">
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'cold')">❄️ Froid</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'auto')">🔄 Auto</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'wet')">💧 Sec</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'heat', true)">🔥 Chaud</button>
         </div>
-
-        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <button class="btn btn-opt" onclick="run('sendCommand', 'light', true)">💡</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'sleep', true)">🌙</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)">✨</button>
-        </div>
-
-        <button class="settings-link" onclick="toggleView(true)">⚙️ Paramètres</button>
+        <button style="background:none; border:none; color:var(--soft); cursor:pointer; margin-top:15px;" onclick="toggleView(true)">⚙️ Paramètres</button>
     </div>
 
     <div class="card" id="config-section">
@@ -102,10 +59,11 @@
 
     <script>
         let tempSet = 200;
+        let refreshTimer = null;
 
-        function toggleView(showConfig) {
-            document.getElementById('main-ui').style.display = showConfig ? 'none' : 'block';
-            document.getElementById('config-section').style.display = showConfig ? 'block' : 'none';
+        function toggleView(show) {
+            document.getElementById('main-ui').style.display = show ? 'none' : 'block';
+            document.getElementById('config-section').style.display = show ? 'block' : 'none';
         }
 
         function saveConfig() {
@@ -115,46 +73,44 @@
             location.reload();
         }
 
-        async function run(action, code, value) {
+        async function run(action, code, value, silent = false) {
             const msg = document.getElementById('status-msg');
-            msg.innerText = "Envoi...";
-            
-            const payload = {
-                action: action, accessId: localStorage.getItem('tuya_id'),
-                accessSecret: localStorage.getItem('tuya_secret'),
-                deviceId: localStorage.getItem('tuya_device'),
-                code: code, value: value
-            };
+            if(!silent) msg.innerText = "Envoi...";
 
             try {
                 const res = await fetch('/api/control', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action, code, value,
+                        accessId: localStorage.getItem('tuya_id'),
+                        accessSecret: localStorage.getItem('tuya_secret'),
+                        deviceId: localStorage.getItem('tuya_device')
+                    })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    msg.innerText = "Confirmé";
+                    if(!silent) msg.innerText = "Confirmé";
                     if(action === 'getStatus') updateUI(data.result);
-                } else { msg.innerText = "Erreur: " + data.msg; }
-            } catch (e) { msg.innerText = "Erreur réseau"; }
-            setTimeout(() => msg.innerText = "Prêt", 2000);
+                } else { if(!silent) msg.innerText = "Erreur: " + data.msg; }
+            } catch (e) { if(!silent) msg.innerText = "Erreur réseau"; }
+            
+            if(!silent) setTimeout(() => msg.innerText = "Prêt", 2000);
         }
 
         function updateUI(statusArray) {
-            // Températures
             const room = statusArray.find(s => s.code === 'temp_current');
-            if(room) document.getElementById('room-val').innerText = "Pièce : " + room.value + "°C";
+            if(room) document.getElementById('room-val').innerText = "Pièce : " + (room.value / 10).toFixed(1) + "°C";
             
             const set = statusArray.find(s => s.code === 'temp_set');
             if(set) {
                 tempSet = set.value;
-                document.getElementById('set-val').innerText = (tempSet / 10) + "°C";
+                document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
             }
-
-            // Couleurs de fond dynamiques
+            
             const mode = statusArray.find(s => s.code === 'mode');
             const heat = statusArray.find(s => s.code === 'heat');
-            document.body.className = ''; 
+            document.body.className = '';
             if (heat && heat.value === true) document.body.classList.add('mode-heat');
             else if (mode) document.body.classList.add('mode-' + mode.value);
         }
@@ -163,12 +119,25 @@
             tempSet += delta;
             if(tempSet < 160) tempSet = 160;
             if(tempSet > 320) tempSet = 320;
-            document.getElementById('set-val').innerText = (tempSet / 10) + "°C";
+            document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
             run('sendCommand', 'temp_set', tempSet);
         }
 
-        if(!localStorage.getItem('tuya_id')) toggleView(true);
-        else run('getStatus');
+        // Système de rafraîchissement automatique toutes les 5 minutes (300 000 ms)
+        function startAutoRefresh() {
+            if(refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(() => {
+                console.log("Mise à jour automatique des données...");
+                run('getStatus', null, null, true); // 'true' pour que ce soit silencieux
+            }, 300000); 
+        }
+
+        if(!localStorage.getItem('tuya_id')) {
+            toggleView(true);
+        } else {
+            run('getStatus');
+            startAutoRefresh(); // Lancement du cycle auto
+        }
     </script>
 </body>
 </html>
