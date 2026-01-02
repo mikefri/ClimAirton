@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@tuya/tuya-connector-nodejs": "^1.0.8"
+  }
+}
