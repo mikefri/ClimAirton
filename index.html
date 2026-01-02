@@ -61,15 +61,28 @@
         }
 
         // Fonction qui appelle l'API Cloud
-        async function sendCommand(power) {
-            const id = localStorage.getItem('tuya_id');
-            const secret = localStorage.getItem('tuya_secret');
-            const device = localStorage.getItem('tuya_device');
+async function sendCommand(power) {
+    const config = {
+        accessId: localStorage.getItem('tuya_id'),
+        accessSecret: localStorage.getItem('tuya_secret'),
+        deviceId: localStorage.getItem('tuya_device'),
+        power: power
+    };
 
-            alert("Appel API avec ID: " + id + "\nAction: " + (power ? "ON" : "OFF"));
-            // Ici, vous devrez faire le lien avec votre petit serveur Backend
-            // car le Cloud Tuya refuse les appels directs du navigateur pour sécurité.
-        }
+    // On envoie les infos au serveur Vercel
+    const response = await fetch('/api/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+    });
+
+    const result = await response.json();
+    if(result.success) {
+        alert("Succès ! La clim a reçu l'ordre.");
+    } else {
+        alert("Erreur : " + result.msg);
+    }
+}
 
         checkConfig();
     </script>
