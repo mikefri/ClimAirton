@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Airton Smart Control</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
         :root { --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; }
@@ -21,18 +23,10 @@
         .btn-off { background: var(--danger); color: white; }
         .btn-opt { background: #f1f3f5; color: var(--text); }
         #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; }
+        #last-update { font-size: 0.7rem; color: var(--soft); margin-top: 15px; font-style: italic; }
         #config-section { display: none; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
     </style>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-<script>
-  // Enregistrement du Service Worker pour l'installation
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-</script>
 </head>
 <body>
     <div id="status-msg">Chargement...</div>
@@ -45,21 +39,27 @@
             <button class="btn-circle" onclick="adjustTemp(-10)">−</button>
             <button class="btn-circle" onclick="adjustTemp(10)">+</button>
         </div>
+
         <div class="grid">
             <button class="btn btn-on" onclick="run('sendCommand', 'switch', true)">ALLUMER</button>
             <button class="btn btn-off" onclick="run('sendCommand', 'switch', false)">ÉTEINDRE</button>
         </div>
+
         <div class="grid">
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'cold')">❄️ Froid</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'auto')">🔄 Auto</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'wet')">💧 Sec</button>
             <button class="btn btn-opt" onclick="run('sendCommand', 'heat', true)">🔥 Chaud</button>
         </div>
+
         <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <button class="btn btn-opt" onclick="run('sendCommand', 'light', true)" title="Lumière">💡 Light</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'sleep', true)" title="Sommeil">🌙 Sleep</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)" title="Santé">✨ Health</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'light', true)">💡 Light</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'sleep', true)">🌙 Sleep</button>
+            <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)">✨ Health</button>
         </div>
+
+        <div id="last-update">Dernière synchro : --:--:--</div>
+        
         <button style="background:none; border:none; color:var(--soft); cursor:pointer; margin-top:15px;" onclick="toggleView(true)">⚙️ Paramètres</button>
     </div>
 
@@ -74,6 +74,8 @@
     <script>
         let tempSet = 200;
         let refreshTimer = null;
+
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
 
         function toggleView(show) {
             document.getElementById('main-ui').style.display = show ? 'none' : 'block';
@@ -113,6 +115,7 @@
         }
 
         function updateUI(statusArray) {
+            // Mise à jour températures
             const room = statusArray.find(s => s.code === 'temp_current');
             if(room) document.getElementById('room-val').innerText = "Pièce : " + (room.value / 10).toFixed(1) + "°C";
             
@@ -122,6 +125,11 @@
                 document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
             }
             
+            // Mise à jour heure d'actualisation
+            const now = new Date();
+            document.getElementById('last-update').innerText = "Dernière synchro : " + now.toLocaleTimeString();
+
+            // Mise à jour couleurs
             const mode = statusArray.find(s => s.code === 'mode');
             const heat = statusArray.find(s => s.code === 'heat');
             document.body.className = '';
@@ -137,21 +145,13 @@
             run('sendCommand', 'temp_set', tempSet);
         }
 
-        // Système de rafraîchissement automatique toutes les 5 minutes (300 000 ms)
         function startAutoRefresh() {
             if(refreshTimer) clearInterval(refreshTimer);
-            refreshTimer = setInterval(() => {
-                console.log("Mise à jour automatique des données...");
-                run('getStatus', null, null, true); // 'true' pour que ce soit silencieux
-            }, 300000); 
+            refreshTimer = setInterval(() => { run('getStatus', null, null, true); }, 300000);
         }
 
-        if(!localStorage.getItem('tuya_id')) {
-            toggleView(true);
-        } else {
-            run('getStatus');
-            startAutoRefresh(); // Lancement du cycle auto
-        }
+        if(!localStorage.getItem('tuya_id')) { toggleView(true); }
+        else { run('getStatus'); startAutoRefresh(); }
     </script>
 </body>
 </html>
