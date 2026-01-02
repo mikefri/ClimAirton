@@ -5,4 +5,4 @@
     "@tuya/tuya-connector-nodejs": "latest",
     "@vercel/kv": "latest"
   }
-},
+}
