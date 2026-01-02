@@ -58,6 +58,54 @@
             <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)">✨ Health</button>
         </div>
 
+        <div class="card" style="margin-top: 20px; border-top: 3px solid #3498db; padding: 15px; background: white; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h4 style="margin: 0 0 15px 0; color: #2c3e50;">⏰ Planning Automatique</h4>
+    <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1;">
+            <label style="display: block; font-size: 0.75rem; color: #7f8c8d; margin-bottom: 5px; font-weight: bold;">Matin (ALLUMER)</label>
+            <input type="number" id="h-on" value="7" min="0" max="23" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dfe6e9; text-align: center; font-size: 1rem;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; font-size: 0.75rem; color: #7f8c8d; margin-bottom: 5px; font-weight: bold;">Soir (ÉTEINDRE)</label>
+            <input type="number" id="h-off" value="22" min="0" max="23" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #dfe6e9; text-align: center; font-size: 1rem;">
+        </div>
+    </div>
+    <button id="save-btn" onclick="saveToCloud()" style="width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+        ENREGISTRER LE PLANNING
+    </button>
+</div>
+
+<script>
+async function saveToCloud() {
+    const btn = document.getElementById('save-btn');
+    const hourOn = document.getElementById('h-on').value;
+    const hourOff = document.getElementById('h-off').value;
+    
+    btn.innerText = "⏳ Synchronisation...";
+    btn.style.background = "#bdc3c7";
+    
+    try {
+        const res = await fetch('/api/save-hours', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hourOn, hourOff })
+        });
+        
+        if (res.ok) {
+            btn.innerText = "✅ ENREGISTRÉ DANS LE CLOUD";
+            btn.style.background = "#2ecc71";
+            setTimeout(() => { 
+                btn.innerText = "ENREGISTRER LE PLANNING";
+                btn.style.background = "#3498db";
+            }, 3000);
+        }
+    } catch (e) {
+        btn.innerText = "ERREUR ❌";
+        btn.style.background = "#e74c3c";
+    }
+}
+</script>
+
         <div id="last-update">Dernière synchro : --:--:--</div>
         
         <button style="background:none; border:none; color:var(--soft); cursor:pointer; margin-top:15px;" onclick="toggleView(true)">⚙️ Paramètres</button>
