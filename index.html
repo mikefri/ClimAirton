@@ -7,35 +7,42 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        :root { --bg: #f5f7fa; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        .card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px; text-align: center; margin-top: 20px; }
-        h2 { margin-top: 0; font-weight: 600; font-size: 1.2rem; }
+        :root { --bg: #f5f7fa; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --disabled: #bdc3c7; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
+        .card { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px; text-align: center; margin-top: 20px; position: relative; }
         
         /* Température */
-        .temp-display { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin: 10px 0; }
+        .temp-display { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin: 10px 0; transition: opacity 0.3s; }
         .temp-controls { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; }
-        .circle-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #eee; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .circle-btn:active { transform: scale(0.9); background: #ddd; }
-
-        /* Grille de boutons */
+        .circle-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #eee; font-size: 24px; cursor: pointer; }
+        
+        /* Grille et Boutons */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 1rem; position: relative; }
         .btn-on { background: var(--success); color: white; }
         .btn-off { background: var(--danger); color: white; }
         .btn-mode { background: #ecf0f1; color: var(--text); }
-        .btn:active { opacity: 0.8; transform: translateY(2px); }
+        
+        /* Animation de chargement */
+        .loading { opacity: 0.6; pointer-events: none; }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; position: absolute; right: 10px; top: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Status Bar */
+        #status-bar { font-size: 0.8rem; margin-bottom: 10px; color: var(--disabled); }
 
-        /* Configuration */
+        /* Config */
         .config-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         #config-section { display: none; }
-        .settings-btn { background: none; border: none; color: #95a5a6; cursor: pointer; margin-top: 20px; font-size: 0.9rem; }
+        .settings-btn { background: none; border: none; color: #95a5a6; cursor: pointer; margin-top: 25px; }
     </style>
 </head>
 <body>
 
+    <div id="status-bar">Prêt</div>
+
     <div class="card" id="main-ui">
-        <h2 id="device-name">Ma Clim Airton</h2>
+        <h2>Airton Pro</h2>
         
         <div class="temp-display" id="temp-val">20°C</div>
         
@@ -45,8 +52,12 @@
         </div>
 
         <div class="grid">
-            <button class="btn btn-on" onclick="callApi('switch', true)">ALLUMER</button>
-            <button class="btn btn-off" onclick="callApi('switch', false)">ÉTEINDRE</button>
+            <button id="btn-switch-true" class="btn btn-on" onclick="callApi('switch', true)">
+                ON <div class="spinner"></div>
+            </button>
+            <button id="btn-switch-false" class="btn btn-off" onclick="callApi('switch', false)">
+                OFF <div class="spinner"></div>
+            </button>
         </div>
 
         <div class="grid">
@@ -56,27 +67,23 @@
             <button class="btn btn-mode" onclick="callApi('light', true)">💡 Light</button>
         </div>
 
-        <button class="settings-btn" onclick="showConfig()">⚙️ Paramètres de connexion</button>
+        <button class="settings-btn" onclick="showConfig()">⚙️ Paramètres</button>
     </div>
 
     <div class="card" id="config-section">
-        <h3>Configuration Tuya</h3>
-        <p style="font-size: 0.8rem; color: #7f8c8d;">Entrez vos identifiants Cloud Tuya</p>
+        <h3>Configuration</h3>
         <input type="text" id="accId" class="config-input" placeholder="Access ID">
         <input type="password" id="accSec" class="config-input" placeholder="Access Secret">
         <input type="text" id="devId" class="config-input" placeholder="Device ID">
-        <button class="btn btn-on" style="width:100%; margin-top:10px;" onclick="saveSettings()">SAUVEGARDER</button>
+        <button class="btn btn-on" style="width:100%" onclick="saveSettings()">SAUVEGARDER</button>
     </div>
 
     <script>
-        let currentSetpoint = 200; // 20.0°C
+        let currentSetpoint = 200;
 
-        // Vérification de la mémoire au chargement
         function init() {
-            const storedId = localStorage.getItem('tuya_id');
-            if (!storedId) {
-                showConfig();
-            }
+            const id = localStorage.getItem('tuya_id');
+            if (!id) showConfig();
         }
 
         function showConfig() {
@@ -88,10 +95,9 @@
             localStorage.setItem('tuya_id', document.getElementById('accId').value);
             localStorage.setItem('tuya_secret', document.getElementById('accSec').value);
             localStorage.setItem('tuya_device', document.getElementById('devId').value);
-            window.location.reload();
+            location.reload();
         }
 
-        // Gestion de la température (Échelle x10 pour Tuya)
         function updateTemp(delta) {
             currentSetpoint += delta;
             if (currentSetpoint < 160) currentSetpoint = 160;
@@ -100,8 +106,11 @@
             callApi('temp_set', currentSetpoint);
         }
 
-        // Appel au serveur Vercel
         async function callApi(code, value) {
+            const statusBar = document.getElementById('status-bar');
+            statusBar.innerText = "Envoi en cours...";
+            
+            // Animation sur le bouton cliqué (optionnel)
             const payload = {
                 accessId: localStorage.getItem('tuya_id'),
                 accessSecret: localStorage.getItem('tuya_secret'),
@@ -117,12 +126,17 @@
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
-                if (!result.success) console.error("Erreur Tuya:", result.msg);
+                
+                if (result.success) {
+                    statusBar.innerText = "Commande effectuée avec succès";
+                    setTimeout(() => statusBar.innerText = "Prêt", 2000);
+                } else {
+                    statusBar.innerText = "Erreur : " + result.msg;
+                }
             } catch (err) {
-                console.error("Erreur réseau:", err);
+                statusBar.innerText = "Erreur de connexion";
             }
         }
-
         init();
     </script>
 </body>
