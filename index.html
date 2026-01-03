@@ -268,13 +268,11 @@
                 if (item.code === 'electricity') document.getElementById('elec-val').innerText = (item.value / 10).toFixed(1) + " W";
                 if (item.code === 'countdown_left') {
     const timerElem = document.getElementById('timer-val');
-    // N'affiche le temps que s'il est supérieur à 1 minute
-    if (item.value > 1) {
-        timerElem.parentElement.style.display = 'block';
-        timerElem.innerText = item.value;
+    // Si la valeur est 0 ou 1, on considère qu'il n'y a pas de minuteur actif
+    if (item.value <= 1) {
+        timerElem.innerText = "--"; 
     } else {
-        // Cache le bloc si la valeur est 0 ou 1 (inactif)
-        timerElem.parentElement.style.display = 'none';
+        timerElem.innerText = item.value;
     }
 }
                 if (item.code === 'total_time') document.getElementById('total-time').innerText = item.value + " h";
