@@ -275,7 +275,10 @@
         timerElem.innerText = item.value;
     }
 }
-                if (item.code === 'total_time') document.getElementById('total-time').innerText = item.value + " h";
+                if (item.code === 'total_time') {
+    // Affiche "1 h 00" au lieu de juste "1" pour simuler la précision
+    document.getElementById('total-time').innerText = item.value + " h 00";
+}
                 
                 // Booleans (Options)
                 const codeMap = { 'mode_ECO':'eco', 'light':'light', 'health':'health', 'sleep':'sleep', 'clean':'clean', 'heat8':'heat8' };
