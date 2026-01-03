@@ -266,7 +266,17 @@
 
                 // Stats
                 if (item.code === 'electricity') document.getElementById('elec-val').innerText = (item.value / 10).toFixed(1) + " W";
-                if (item.code === 'countdown_left') document.getElementById('timer-val').innerText = item.value + " min";
+                if (item.code === 'countdown_left') {
+    const timerElem = document.getElementById('timer-val');
+    // N'affiche le temps que s'il est supérieur à 1 minute
+    if (item.value > 1) {
+        timerElem.parentElement.style.display = 'block';
+        timerElem.innerText = item.value;
+    } else {
+        // Cache le bloc si la valeur est 0 ou 1 (inactif)
+        timerElem.parentElement.style.display = 'none';
+    }
+}
                 if (item.code === 'total_time') document.getElementById('total-time').innerText = item.value + " h";
                 
                 // Booleans (Options)
