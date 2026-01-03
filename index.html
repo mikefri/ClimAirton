@@ -10,31 +10,40 @@
     <style>
         :root { --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; transition: background 0.8s; }
+        
+        /* Changement dynamique de couleur de fond */
         body.mode-cold { background-color: #e3f2fd; }
         body.mode-heat { background-color: #fbe9e7; }
+        body.status-off { filter: grayscale(0.5); opacity: 0.9; }
+
         .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 360px; text-align: center; margin-bottom: 20px; }
         .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); line-height: 1; }
         .temp-room { font-size: 1.1rem; color: var(--soft); margin-bottom: 20px; font-weight: 600; }
         .temp-controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
-        .btn-circle { width: 65px; height: 65px; border-radius: 50%; border: none; background: #f8f9fa; font-size: 28px; cursor: pointer; }
+        .btn-circle { width: 65px; height: 65px; border-radius: 50%; border: none; background: #f8f9fa; font-size: 28px; cursor: pointer; transition: transform 0.1s; }
+        .btn-circle:active { transform: scale(0.9); }
+        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+        .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .btn-on { background: var(--success); color: white; }
         .btn-off { background: var(--danger); color: white; }
         .btn-opt { background: #f1f3f5; color: var(--text); }
-        #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; }
+        .btn-active { background: var(--primary); color: white; }
+
+        #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; font-weight: bold; }
         #last-update { font-size: 0.7rem; color: var(--soft); margin-top: 15px; font-style: italic; }
         #config-section { display: none; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
     </style>
 </head>
 <body>
-    <div id="status-msg">Chargement...</div>
+
+    <div id="status-msg">Initialisation...</div>
     
     <div class="card" id="main-ui">
         <div class="temp-room" id="room-val">Pièce : --°C</div>
         <div class="temp-main" id="set-val">--°C</div>
-        <div style="font-size: 0.8rem; color: var(--soft); margin-bottom: 15px;">Consigne</div>
+        <div style="font-size: 0.8rem; color: var(--soft); margin-bottom: 15px;">Température Consigne</div>
         
         <div class="temp-controls">
             <button class="btn-circle" onclick="adjustTemp(-10)">−</button>
@@ -42,25 +51,25 @@
         </div>
 
         <div class="grid">
-            <button class="btn btn-on" onclick="run('sendCommand', 'switch', true)">ALLUMER</button>
-            <button class="btn btn-off" onclick="run('sendCommand', 'switch', false)">ÉTEINDRE</button>
+            <button class="btn btn-on" onclick="runCommand('switch', true)">ALLUMER</button>
+            <button class="btn btn-off" onclick="runCommand('switch', false)">ÉTEINDRE</button>
         </div>
 
         <div class="grid">
-            <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'cold')">❄️ Froid</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'auto')">🔄 Auto</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'mode', 'wet')">💧 Sec</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'heat', true)">🔥 Chaud</button>
+            <button class="btn btn-opt" id="btn-cold" onclick="runCommand('mode', 'cold')">❄️ Froid</button>
+            <button class="btn btn-opt" id="btn-heat" onclick="runCommand('mode', 'hot')">🔥 Chaud</button>
+            <button class="btn btn-opt" onclick="runCommand('mode', 'auto')">🔄 Auto</button>
+            <button class="btn btn-opt" onclick="runCommand('mode', 'wet')">💧 Sec</button>
         </div>
 
         <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <button class="btn btn-opt" onclick="run('sendCommand', 'light', true)">💡 Light</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'sleep', true)">🌙 Sleep</button>
-            <button class="btn btn-opt" onclick="run('sendCommand', 'health', true)">✨ Health</button>
+            <button class="btn btn-opt" onclick="runCommand('light', true)">💡 Light</button>
+            <button class="btn btn-opt" onclick="runCommand('sleep', true)">🌙 Sleep</button>
+            <button class="btn btn-opt" onclick="runCommand('health', true)">✨ Health</button>
         </div>
 
         <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px;">
-            <h4 style="margin: 0 0 15px 0; color: #2c3e50;">⏰ Planning Automatiqu</h4>
+            <h4 style="margin: 0 0 15px 0; color: #2c3e50;">⏰ Planning Automatique</h4>
             <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;">
                 <div style="flex: 1;">
                     <label style="display: block; font-size: 0.7rem; color: #7f8c8d; margin-bottom: 5px;">ON (h)</label>
@@ -81,21 +90,123 @@
     </div>
 
     <div class="card" id="config-section">
-        <h3>Configuration</h3>
+        <h3>Configuration Tuya</h3>
+        <p style="font-size: 0.8rem; color: var(--soft);">Entrez vos identifiants Cloud Tuya</p>
         <input type="text" id="cfg-id" placeholder="Access ID">
         <input type="password" id="cfg-sec" placeholder="Access Secret">
         <input type="text" id="cfg-dev" placeholder="Device ID">
-        <button class="btn btn-on" style="width:100%" onclick="saveConfig()">ENREGISTRER</button>
+        <button class="btn btn-on" style="width:100%" onclick="saveConfig()">ENREGISTRER & CONNEXION</button>
         <button style="background:none; border:none; color:var(--soft); cursor:pointer; margin-top:15px;" onclick="toggleView(false)">Retour</button>
     </div>
 
     <script>
-        let tempSet = 200;
-        let refreshTimer = null;
+        let tempSet = 200; // Valeur par défaut (20.0°C)
+        let isConfigured = !!localStorage.getItem('tuya_id');
 
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
+        // 1. GESTION DU STATUT (GET DEVICE STATUS)
+        async function fetchDeviceStatus(silent = false) {
+            if (!isConfigured) return;
+            const msg = document.getElementById('status-msg');
+            if (!silent) msg.innerText = "Mise à jour...";
 
-        // FONCTION DE SAUVEGARDE PLANNING
+            try {
+                const response = await fetch('/api/control', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getStatus',
+                        accessId: localStorage.getItem('tuya_id'),
+                        accessSecret: localStorage.getItem('tuya_secret'),
+                        deviceId: localStorage.getItem('tuya_device')
+                    })
+                });
+                const data = await response.json();
+                if (data.success && data.result) {
+                    updateUI(data.result);
+                    if (!silent) msg.innerText = "Connecté";
+                } else {
+                    msg.innerText = "Erreur Tuya";
+                }
+            } catch (e) {
+                msg.innerText = "Erreur de réseau";
+            }
+        }
+
+        // 2. MISE À JOUR DE L'INTERFACE SELON LES CODES TUYA
+        function updateUI(statusArray) {
+            statusArray.forEach(item => {
+                // Correspondance avec les codes de votre API
+                if (item.code === 'temp_current') {
+                    document.getElementById('room-val').innerText = "Pièce : " + (item.value / 10).toFixed(1) + "°C";
+                }
+                if (item.code === 'temp_set') {
+                    tempSet = item.value;
+                    document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
+                }
+                if (item.code === 'switch') {
+                    document.body.classList.toggle('status-off', !item.value);
+                    document.getElementById('status-msg').innerText = item.value ? "En marche" : "À l'arrêt";
+                }
+                if (item.code === 'mode') {
+                    document.body.className = ''; // Reset classes
+                    if (item.value === 'hot') document.body.classList.add('mode-heat');
+                    if (item.value === 'cold') document.body.classList.add('mode-cold');
+                }
+            });
+            document.getElementById('last-update').innerText = "Dernière synchro : " + new Date().toLocaleTimeString();
+        }
+
+        // 3. ENVOI DE COMMANDES
+        async function runCommand(code, value) {
+            const msg = document.getElementById('status-msg');
+            msg.innerText = "Envoi...";
+            
+            try {
+                const res = await fetch('/api/control', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: 'sendCommand',
+                        code: code,
+                        value: value,
+                        accessId: localStorage.getItem('tuya_id'),
+                        accessSecret: localStorage.getItem('tuya_secret'),
+                        deviceId: localStorage.getItem('tuya_device')
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msg.innerText = "Confirmé";
+                    // On rafraîchit le statut 1 sec après pour confirmer le changement
+                    setTimeout(() => fetchDeviceStatus(true), 1000);
+                }
+            } catch (e) {
+                msg.innerText = "Erreur d'envoi";
+            }
+        }
+
+        // 4. AJUSTEMENT TEMPÉRATURE
+        function adjustTemp(delta) {
+            tempSet += delta;
+            if(tempSet < 160) tempSet = 160;
+            if(tempSet > 320) tempSet = 320;
+            document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
+            runCommand('temp_set', tempSet);
+        }
+
+        // 5. FONCTIONS UTILITAIRES (CONFIG, VIEW)
+        function toggleView(showConfig) {
+            document.getElementById('main-ui').style.display = showConfig ? 'none' : 'block';
+            document.getElementById('config-section').style.display = showConfig ? 'block' : 'none';
+        }
+
+        function saveConfig() {
+            localStorage.setItem('tuya_id', document.getElementById('cfg-id').value);
+            localStorage.setItem('tuya_secret', document.getElementById('cfg-sec').value);
+            localStorage.setItem('tuya_device', document.getElementById('cfg-dev').value);
+            location.reload();
+        }
+
         async function saveToCloud() {
             const btn = document.getElementById('save-btn');
             const hOn = document.getElementById('h-on').value;
@@ -115,62 +226,20 @@
             } catch (e) { btn.innerText = "ERREUR ❌"; }
         }
 
-        function toggleView(show) {
-            document.getElementById('main-ui').style.display = show ? 'none' : 'block';
-            document.getElementById('config-section').style.display = show ? 'block' : 'none';
+        // INITIALISATION AU DÉMARRAGE
+        if (!isConfigured) {
+            toggleView(true);
+        } else {
+            // Charger les IDs dans les champs de config pour l'utilisateur
+            document.getElementById('cfg-id').value = localStorage.getItem('tuya_id');
+            document.getElementById('cfg-dev').value = localStorage.getItem('tuya_device');
+            
+            // Premier appel et boucle de rafraîchissement (30 sec)
+            fetchDeviceStatus();
+            setInterval(() => fetchDeviceStatus(true), 30000);
         }
 
-        function saveConfig() {
-            localStorage.setItem('tuya_id', document.getElementById('cfg-id').value);
-            localStorage.setItem('tuya_secret', document.getElementById('cfg-sec').value);
-            localStorage.setItem('tuya_device', document.getElementById('cfg-dev').value);
-            location.reload();
-        }
-
-        async function run(action, code, value, silent = false) {
-            const msg = document.getElementById('status-msg');
-            if(!silent) msg.innerText = "Envoi...";
-            try {
-                const res = await fetch('/api/control', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        action, code, value,
-                        accessId: localStorage.getItem('tuya_id'),
-                        accessSecret: localStorage.getItem('tuya_secret'),
-                        deviceId: localStorage.getItem('tuya_device')
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    if(!silent) msg.innerText = "Confirmé";
-                    if(action === 'getStatus') updateUI(data.result);
-                }
-            } catch (e) { if(!silent) msg.innerText = "Erreur réseau"; }
-            if(!silent) setTimeout(() => msg.innerText = "Prêt", 2000);
-        }
-
-        function updateUI(statusArray) {
-            const room = statusArray.find(s => s.code === 'temp_current');
-            if(room) document.getElementById('room-val').innerText = "Pièce : " + (room.value / 10).toFixed(1) + "°C";
-            const set = statusArray.find(s => s.code === 'temp_set');
-            if(set) {
-                tempSet = set.value;
-                document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
-            }
-            document.getElementById('last-update').innerText = "Dernière synchro : " + new Date().toLocaleTimeString();
-        }
-
-        function adjustTemp(delta) {
-            tempSet += delta;
-            if(tempSet < 160) tempSet = 160;
-            if(tempSet > 320) tempSet = 320;
-            document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
-            run('sendCommand', 'temp_set', tempSet);
-        }
-
-        if(!localStorage.getItem('tuya_id')) { toggleView(true); }
-        else { run('getStatus'); setInterval(() => { run('getStatus', null, null, true); }, 300000); }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
