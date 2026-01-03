@@ -138,13 +138,29 @@
         </div>
     </div>
 
-    <div class="card" id="config-section" style="display:none;">
-        <h3>Configuration Tuya Cloud</h3>
+<div class="card" id="config-section" style="display:none;">
+        <h3 style="margin-top:0; color:var(--primary);">Configuration Tuya Cloud</h3>
+        
+        <div style="text-align: left; font-size: 0.75rem; background: #eef2f7; padding: 12px; border-radius: 12px; margin-bottom: 15px; line-height: 1.4;">
+            <p style="margin-top:0;"><strong>Comment obtenir vos accès ?</strong></p>
+            <ol style="padding-left: 15px; margin-bottom: 0;">
+                <li>Créez un compte sur <a href="https://iot.tuya.com/" target="_blank">iot.tuya.com</a>.</li>
+                <li>Créez un "Cloud Project" et liez votre compte Smart Life (onglet <b>Devices > Link Tuya App</b>).</li>
+                <li>Copiez l'<b>Access ID</b> et le <b>Secret</b> dans l'onglet "Overview".</li>
+                <li>Copiez le <b>Device ID</b> depuis l'onglet "Devices".</li>
+            </ol>
+        </div>
+
         <input type="text" id="cfg-id" placeholder="Tuya Access ID">
         <input type="password" id="cfg-sec" placeholder="Tuya Access Secret">
         <input type="text" id="cfg-dev" placeholder="ID de l'appareil (Device ID)">
+        
         <button class="btn pwr-on" style="width:100%" onclick="saveConfig()">ENREGISTRER & CONNEXION</button>
         <button class="btn" style="width:100%; margin-top:10px;" onclick="toggleView(false)">RETOUR</button>
+        
+        <p style="font-size: 0.6rem; color: var(--soft); margin-top: 15px;">
+            🔒 Vos identifiants sont stockés uniquement sur votre appareil (localStorage) et ne transitent jamais par nos serveurs.
+        </p>
     </div>
 
     <script>
