@@ -1,0 +1,44 @@
+=========================================================== TECHNICAL DOCUMENTATION: AIRTON AC - DP INSTRUCTIONS & STATUS
+CONTROL INSTRUCTIONS (COMMANDS)
+Power Boolean "{true,false}"
+
+temp_set Integer { "unit": "℃", "min": 160, "max": 880, "scale": 1, "step": 10 }
+
+mode Enum { "range": [ "auto", "cold", "wet", "heat", "fan" ] }
+
+windspeed Enum { "range": [ "auto", "low", "low_mid", "mid", "mid_high", "high", "mute", "turbo" ] }
+
+windshake Enum { "range": [ "un_down", "left_right", "all", "off" ] }
+
+horizontal Enum { "range": [ "off", "same", "opposite" ] }
+
+vertical Enum { "range": [ "off", "15", "1", "2", "3", "4", "5" ] }
+
+Countdown Enum { "range": [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" ] }
+
+unit Enum { "range": [ "c", "f" ] }
+
+mode_ECO Boolean "{true,false}" mode_dry Boolean "{true,false}" heat Boolean "{true,false}" light Boolean "{true,false}" swing3d Boolean "{true,false}" sleep Boolean "{true,false}" health Boolean "{true,false}" clean Boolean "{true,false}" heat8 Boolean "{true,false}"
+
+DEVICE STATUS (REPORTING)
+temp_current Integer { "unit": "℃", "min": 0, "max": 600, "scale": 1, "step": 1 }
+
+countdown_left Integer { "unit": "分钟", "min": 0, "max": 1440, "scale": 0, "step": 1 }
+
+electricity Integer { "unit": "", "min": 0, "max": 70000, "scale": 1, "step": 1 }
+
+electricity_number Integer { "unit": "", "min": 0, "max": 10000, "scale": 0, "step": 1 }
+
+use_number Integer { "unit": "", "min": 0, "max": 100000, "scale": 0, "step": 1 }
+
+total_time Integer { "unit": "", "min": 0, "max": 70000, "scale": 0, "step": 1 }
+
+type Enum { "range": [ "cold", "cold_heat" ] }
+
+current_mode Enum { "range": [ "cold", "wet", "heat", "fan" ] }
+
+FaultBitmap { "label": [ "CL", "E4", "E5", "H6", "H9", "HE", "L0", "L1", "L2", "L3", "L6", "L7", "L8", "L9", "LA", "Ld", "P0", "P1", "P6", "P8", "PA", "PC", "Pd", "PE" ], "maxlen": 24 }
+
+fault2Bitmap { "label": [ "PF", "SC", "U0", "U1", "U2", "U3", "U4", "U5", "U6", "U7", "U8", "U9", "UC", "Ud", "E1", "E2" ], "maxlen": 16 }
+
+===========================================================
