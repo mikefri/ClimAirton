@@ -1,71 +1,181 @@
 ===========================================================
-DOCUMENTATION TECHNIQUE : CLIMATISEUR AIRTON (API TUYA DP)
+TECHNICAL DOCUMENTATION: AIRTON AC - DP INSTRUCTIONS & STATUS
 ===========================================================
 
-ID DE L'APPAREIL : ?
-MODE D'INSTRUCTION : DP Instruction (Raw Mode)
-TYPE : Climatiseur Réversible (Froid/Chaud)
+-----------------------------------------------------------
+1. CONTROL INSTRUCTIONS (COMMANDS)
+-----------------------------------------------------------
+
+Power Boolean "{true,false}"
+
+temp_set Integer {
+  "unit": "℃",
+  "min": 160,
+  "max": 880,
+  "scale": 1,
+  "step": 10
+}
+
+mode Enum {
+  "range": [
+    "auto",
+    "cold",
+    "wet",
+    "heat",
+    "fan"
+  ]
+}
+
+windspeed Enum {
+  "range": [
+    "auto",
+    "low",
+    "low_mid",
+    "mid",
+    "mid_high",
+    "high",
+    "mute",
+    "turbo"
+  ]
+}
+
+windshake Enum {
+  "range": [
+    "un_down",
+    "left_right",
+    "all",
+    "off"
+  ]
+}
+
+horizontal Enum {
+  "range": [
+    "off",
+    "same",
+    "opposite"
+  ]
+}
+
+vertical Enum {
+  "range": [
+    "off",
+    "15",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+  ]
+}
+
+Countdown Enum {
+  "range": [
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+    "11", "12", "13", "14", "15", "16", "17", "18", "19", 
+    "20", "21", "22", "23", "24"
+  ]
+}
+
+unit Enum {
+  "range": [
+    "c",
+    "f"
+  ]
+}
+
+mode_ECO Boolean "{true,false}"
+mode_dry Boolean "{true,false}"
+heat Boolean "{true,false}"
+light Boolean "{true,false}"
+swing3d Boolean "{true,false}"
+sleep Boolean "{true,false}"
+health Boolean "{true,false}"
+clean Boolean "{true,false}"
+heat8 Boolean "{true,false}"
 
 -----------------------------------------------------------
-1. COMMANDES DE CONTRÔLE (INSTRUCTIONS - ENVOI)
+2. DEVICE STATUS (REPORTING)
 -----------------------------------------------------------
-Ces codes servent à piloter l'appareil via l'API.
 
-[SYSTÈME]
-- Power (Boolean)        : Allumage (true) / Extinction (false)
-- temp_set (Integer)     : Température cible. Plage 160-880. Échelle 1. Step 10.
-                           (Ex: 200 = 20°C / 255 = 25.5°C)
-- unit (Enum)            : Unité de mesure [c, f]
-- light (Boolean)        : Affichage LED de la clim (true/false)
+temp_current Integer {
+  "unit": "℃",
+  "min": 0,
+  "max": 600,
+  "scale": 1,
+  "step": 1
+}
 
-[MODES ET VENTILATION]
-- mode (Enum)            : [auto, cold, wet, heat, fan]
-- windspeed (Enum)       : [auto, low, low_mid, mid, mid_high, high, mute, turbo]
-- heat8 (Boolean)        : Mode Hors-gel 8°C (true/false)
+countdown_left Integer {
+  "unit": "分钟",
+  "min": 0,
+  "max": 1440,
+  "scale": 0,
+  "step": 1
+}
 
-[FLUX D'AIR ET OSCILLATION]
-- windshake (Enum)       : Oscillation auto [un_down, left_right, all, off]
-- vertical (Enum)        : Position volet vertical [off, 15, 1, 2, 3, 4, 5]
-- horizontal (Enum)      : Position volet horizontal [off, same, opposite]
-- swing3d (Boolean)      : Oscillation combinée 3D (true/false)
+electricity Integer {
+  "unit": "",
+  "min": 0,
+  "max": 70000,
+  "scale": 1,
+  "step": 1
+}
 
-[OPTIONS DE CONFORT]
-- mode_ECO (Boolean)     : Mode Économie (true/false)
-- sleep (Boolean)        : Mode Nuit (true/false)
-- health (Boolean)       : Ioniseur / Santé (true/false)
-- clean (Boolean)        : Auto-nettoyage (true/false)
+electricity_number Integer {
+  "unit": "",
+  "min": 0,
+  "max": 10000,
+  "scale": 0,
+  "step": 1
+}
 
------------------------------------------------------------
-2. CAPTEURS ET ÉTATS (STATUS - RÉCEPTION)
------------------------------------------------------------
-Informations renvoyées par l'appareil pour mise à jour de l'UI.
+use_number Integer {
+  "unit": "",
+  "min": 0,
+  "max": 100000,
+  "scale": 0,
+  "step": 1
+}
 
-- temp_current (Integer) : Température ambiante actuelle (Échelle 0.1, ex: 230 = 23°C)
-- electricity (Integer)  : Consommation instantanée en Watts (Échelle 0.1)
-- countdown_left (Int)   : Temps restant minuterie en minutes (0-1440)
-- total_time (Integer)   : Cumul d'utilisation en heures
-- current_mode (Enum)    : Mode actif réel [cold, wet, heat, fan]
+total_time Integer {
+  "unit": "",
+  "min": 0,
+  "max": 70000,
+  "scale": 0,
+  "step": 1
+}
 
------------------------------------------------------------
-3. DIAGNOSTICS ET ERREURS (BITMAPS)
------------------------------------------------------------
-Codes d'état importants remontés dans FaultBitmap et fault2Bitmap.
+type Enum {
+  "range": [
+    "cold",
+    "cold_heat"
+  ]
+}
 
-[MAINTENANCE]
-- SC : Self-Clean (Nettoyage automatique en cours)
-- CL : Rappel de nettoyage des filtres
-- PF : Power Failure (Instabilité électrique détectée)
+current_mode Enum {
+  "range": [
+    "cold",
+    "wet",
+    "heat",
+    "fan"
+  ]
+}
 
-[ERREURS TECHNIQUES]
-- E1, E2, E4, E5 : Défauts de sondes de température
-- H6, H9 : Problèmes moteur ventilateur ou compresseur
-- L0 - L9 : Erreurs de tension ou de communication
-- U0 - UC : Erreurs de communication entre unités intérieure/extérieure
+FaultBitmap {
+  "label": [
+    "CL", "E4", "E5", "H6", "H9", "HE", "L0", "L1", "L2", "L3", 
+    "L6", "L7", "L8", "L9", "LA", "Ld", "P0", "P1", "P6", "P8", 
+    "PA", "PC", "Pd", "PE"
+  ],
+  "maxlen": 24
+}
 
------------------------------------------------------------
-NOTES IMPORTANTES :
-1. Le passage en "DP Instruction" rend le code "switch" obsolète, 
-   il doit être remplacé par "Power".
-2. Pour les températures, toujours diviser la valeur reçue par 10 
-   pour obtenir les Celsius réels.
+fault2Bitmap {
+  "label": [
+    "PF", "SC", "U0", "U1", "U2", "U3", "U4", "U5", "U6", "U7", 
+    "U8", "U9", "UC", "Ud", "E1", "E2"
+  ],
+  "maxlen": 16
+}
+
 ===========================================================
