@@ -109,13 +109,14 @@
 <body>
 
     <div id="status-msg">Connexion...</div>
-<div id="power-display" style="font-weight: bold; margin-top: 5px; font-size: 1.1rem; color: #2ecc71;">
-    Statut : ALLUMÉ ✅
-</div>
+
     
     <div class="card" id="main-ui">
         <button onclick="openHelp()" style="position:absolute; top:15px; right:15px; border:none; background:#f1f3f5; border-radius:50%; width:35px; height:35px; cursor:pointer; font-weight:bold; color:var(--primary);">?</button>
-        
+
+      <div id="power-badge" style="position: absolute; top: 15px; left: 20px; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">
+    --
+</div>
         <div class="temp-room" id="room-val">Sonde : --°C</div>
         <div class="temp-main" id="set-val">--°C</div>
         
@@ -277,7 +278,20 @@
                 }
 
                 // Modes & Power
-                if (item.code === 'Power') document.body.classList.toggle('status-off', !item.value);
+                if (item.code === 'Power') {
+    const badge = document.getElementById('power-badge');
+    if (item.value === true) {
+        badge.innerText = "● ALLUMÉ";
+        badge.style.background = "#e8f5e9"; // Fond vert très clair
+        badge.style.color = "#2ecc71";      // Texte vert
+        document.body.classList.remove('status-off');
+    } else {
+        badge.innerText = "○ ÉTEINT";
+        badge.style.background = "#ffebee"; // Fond rouge très clair
+        badge.style.color = "#e74c3c";      // Texte rouge
+        document.body.classList.add('status-off');
+    }
+}
                 if (item.code === 'mode') {
                     document.querySelectorAll('[id^="mode-"]').forEach(b => b.classList.remove('btn-active'));
                     document.getElementById('mode-' + item.value)?.classList.add('btn-active');
