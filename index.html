@@ -11,12 +11,12 @@
         :root { --bg: #f0f3f7; --card: #ffffff; --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --text: #2c3e50; --soft: #95a5a6; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; transition: background 0.8s; }
         
-        /* Changement dynamique de couleur de fond */
         body.mode-cold { background-color: #e3f2fd; }
         body.mode-heat { background-color: #fbe9e7; }
+        body.mode-fan { background-color: #e8f5e9; }
         body.status-off { filter: grayscale(0.5); opacity: 0.9; }
 
-        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 360px; text-align: center; margin-bottom: 20px; }
+        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 360px; text-align: center; margin-bottom: 20px; box-sizing: border-box; }
         .temp-main { font-size: 4rem; font-weight: 800; color: var(--primary); line-height: 1; }
         .temp-room { font-size: 1.1rem; color: var(--soft); margin-bottom: 20px; font-weight: 600; }
         .temp-controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
@@ -28,7 +28,12 @@
         .btn-on { background: var(--success); color: white; }
         .btn-off { background: var(--danger); color: white; }
         .btn-opt { background: #f1f3f5; color: var(--text); }
-        .btn-active { background: var(--primary); color: white; }
+        .btn-active { background: var(--primary) !important; color: white !important; }
+
+        /* Nouveau style pour la vitesse de ventilation */
+        .fan-selector { display: flex; background: #f1f3f5; border-radius: 12px; padding: 4px; margin-bottom: 20px; gap: 4px; }
+        .fan-btn { flex: 1; border: none; background: none; padding: 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: var(--soft); transition: 0.3s; }
+        .fan-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
         #status-msg { font-size: 0.8rem; color: var(--soft); margin-bottom: 10px; height: 15px; font-weight: bold; }
         #last-update { font-size: 0.7rem; color: var(--soft); margin-top: 15px; font-style: italic; }
@@ -43,11 +48,19 @@
     <div class="card" id="main-ui">
         <div class="temp-room" id="room-val">Pièce : --°C</div>
         <div class="temp-main" id="set-val">--°C</div>
-        <div style="font-size: 0.8rem; color: var(--soft); margin-bottom: 15px;">Température Consigne</div>
+        <div style="font-size: 0.8rem; color: var(--soft); margin-bottom: 15px;">Consigne</div>
         
         <div class="temp-controls">
             <button class="btn-circle" onclick="adjustTemp(-10)">−</button>
             <button class="btn-circle" onclick="adjustTemp(10)">+</button>
+        </div>
+
+        <div style="font-size: 0.7rem; color: var(--soft); margin-bottom: 8px; text-align: left; padding-left: 5px;">Vitesse Ventilation</div>
+        <div class="fan-selector">
+            <button class="fan-btn" id="fan-low" onclick="runCommand('fan_speed_enum', 'low')">LENT</button>
+            <button class="fan-btn" id="fan-mid" onclick="runCommand('fan_speed_enum', 'mid')">MOYEN</button>
+            <button class="fan-btn" id="fan-high" onclick="runCommand('fan_speed_enum', 'high')">FORT</button>
+            <button class="fan-btn" id="fan-auto" onclick="runCommand('fan_speed_enum', 'auto')">AUTO</button>
         </div>
 
         <div class="grid">
@@ -56,20 +69,20 @@
         </div>
 
         <div class="grid">
-            <button class="btn btn-opt" id="btn-cold" onclick="runCommand('mode', 'cold')">❄️ Froid</button>
-            <button class="btn btn-opt" id="btn-heat" onclick="runCommand('mode', 'hot')">🔥 Chaud</button>
-            <button class="btn btn-opt" onclick="runCommand('mode', 'auto')">🔄 Auto</button>
-            <button class="btn btn-opt" onclick="runCommand('mode', 'wet')">💧 Sec</button>
+            <button class="btn btn-opt" id="mode-cold" onclick="runCommand('mode', 'cold')">❄️ Froid</button>
+            <button class="btn btn-opt" id="mode-hot" onclick="runCommand('mode', 'hot')">🔥 Chaud</button>
+            <button class="btn btn-opt" id="mode-fan" onclick="runCommand('mode', 'fan')">🌬️ Ventilo</button>
+            <button class="btn btn-opt" id="mode-auto" onclick="runCommand('mode', 'auto')">🔄 Auto</button>
         </div>
 
         <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-            <button class="btn btn-opt" onclick="runCommand('light', true)">💡 Light</button>
-            <button class="btn btn-opt" onclick="runCommand('sleep', true)">🌙 Sleep</button>
-            <button class="btn btn-opt" onclick="runCommand('health', true)">✨ Health</button>
+            <button class="btn btn-opt" id="feat-light" onclick="runCommand('light', true)">💡 Light</button>
+            <button class="btn btn-opt" id="feat-sleep" onclick="runCommand('sleep', true)">🌙 Sleep</button>
+            <button class="btn btn-opt" id="feat-health" onclick="runCommand('health', true)">✨ Health</button>
         </div>
 
         <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px;">
-            <h4 style="margin: 0 0 15px 0; color: #2c3e50;">⏰ Planning Automatique</h4>
+            <h4 style="margin: 0 0 15px 0; color: #2c3e50;">⏰ Planning</h4>
             <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;">
                 <div style="flex: 1;">
                     <label style="display: block; font-size: 0.7rem; color: #7f8c8d; margin-bottom: 5px;">ON (h)</label>
@@ -81,7 +94,7 @@
                 </div>
             </div>
             <button id="save-btn" onclick="saveToCloud()" style="width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                ENREGISTRER LE PLANNING
+                ENREGISTRER
             </button>
         </div>
 
@@ -91,24 +104,21 @@
 
     <div class="card" id="config-section">
         <h3>Configuration Tuya</h3>
-        <p style="font-size: 0.8rem; color: var(--soft);">Entrez vos identifiants Cloud Tuya</p>
         <input type="text" id="cfg-id" placeholder="Access ID">
         <input type="password" id="cfg-sec" placeholder="Access Secret">
         <input type="text" id="cfg-dev" placeholder="Device ID">
-        <button class="btn btn-on" style="width:100%" onclick="saveConfig()">ENREGISTRER & CONNEXION</button>
+        <button class="btn btn-on" style="width:100%" onclick="saveConfig()">ENREGISTRER</button>
         <button style="background:none; border:none; color:var(--soft); cursor:pointer; margin-top:15px;" onclick="toggleView(false)">Retour</button>
     </div>
 
     <script>
-        let tempSet = 200; // Valeur par défaut (20.0°C)
+        let tempSet = 200;
         let isConfigured = !!localStorage.getItem('tuya_id');
 
-        // 1. GESTION DU STATUT (GET DEVICE STATUS)
         async function fetchDeviceStatus(silent = false) {
             if (!isConfigured) return;
             const msg = document.getElementById('status-msg');
             if (!silent) msg.innerText = "Mise à jour...";
-
             try {
                 const response = await fetch('/api/control', {
                     method: 'POST',
@@ -124,18 +134,13 @@
                 if (data.success && data.result) {
                     updateUI(data.result);
                     if (!silent) msg.innerText = "Connecté";
-                } else {
-                    msg.innerText = "Erreur Tuya";
                 }
-            } catch (e) {
-                msg.innerText = "Erreur de réseau";
-            }
+            } catch (e) { msg.innerText = "Erreur de réseau"; }
         }
 
-        // 2. MISE À JOUR DE L'INTERFACE SELON LES CODES TUYA
         function updateUI(statusArray) {
             statusArray.forEach(item => {
-                // Correspondance avec les codes de votre API
+                // Température
                 if (item.code === 'temp_current') {
                     document.getElementById('room-val').innerText = "Pièce : " + (item.value / 10).toFixed(1) + "°C";
                 }
@@ -143,32 +148,40 @@
                     tempSet = item.value;
                     document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
                 }
+                // Switch ON/OFF
                 if (item.code === 'switch') {
                     document.body.classList.toggle('status-off', !item.value);
                     document.getElementById('status-msg').innerText = item.value ? "En marche" : "À l'arrêt";
                 }
+                // Mode de fonctionnement
                 if (item.code === 'mode') {
-                    document.body.className = ''; // Reset classes
+                    document.body.classList.remove('mode-heat', 'mode-cold', 'mode-fan');
+                    document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('btn-active'));
+                    const btn = document.getElementById('mode-' + item.value);
+                    if (btn) btn.classList.add('btn-active');
                     if (item.value === 'hot') document.body.classList.add('mode-heat');
                     if (item.value === 'cold') document.body.classList.add('mode-cold');
+                    if (item.value === 'fan') document.body.classList.add('mode-fan');
+                }
+                // Vitesse Ventilo (Nouveau)
+                if (item.code === 'fan_speed_enum') {
+                    document.querySelectorAll('.fan-btn').forEach(b => b.classList.remove('active'));
+                    const fanBtn = document.getElementById('fan-' + item.value);
+                    if (fanBtn) fanBtn.classList.add('active');
                 }
             });
             document.getElementById('last-update').innerText = "Dernière synchro : " + new Date().toLocaleTimeString();
         }
 
-        // 3. ENVOI DE COMMANDES
         async function runCommand(code, value) {
             const msg = document.getElementById('status-msg');
             msg.innerText = "Envoi...";
-            
             try {
                 const res = await fetch('/api/control', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        action: 'sendCommand',
-                        code: code,
-                        value: value,
+                        action: 'sendCommand', code, value,
                         accessId: localStorage.getItem('tuya_id'),
                         accessSecret: localStorage.getItem('tuya_secret'),
                         deviceId: localStorage.getItem('tuya_device')
@@ -177,24 +190,18 @@
                 const data = await res.json();
                 if (data.success) {
                     msg.innerText = "Confirmé";
-                    // On rafraîchit le statut 1 sec après pour confirmer le changement
-                    setTimeout(() => fetchDeviceStatus(true), 1000);
+                    setTimeout(() => fetchDeviceStatus(true), 800);
                 }
-            } catch (e) {
-                msg.innerText = "Erreur d'envoi";
-            }
+            } catch (e) { msg.innerText = "Erreur d'envoi"; }
         }
 
-        // 4. AJUSTEMENT TEMPÉRATURE
         function adjustTemp(delta) {
             tempSet += delta;
-            if(tempSet < 160) tempSet = 160;
-            if(tempSet > 320) tempSet = 320;
+            tempSet = Math.max(160, Math.min(320, tempSet));
             document.getElementById('set-val').innerText = (tempSet / 10).toFixed(1) + "°C";
             runCommand('temp_set', tempSet);
         }
 
-        // 5. FONCTIONS UTILITAIRES (CONFIG, VIEW)
         function toggleView(showConfig) {
             document.getElementById('main-ui').style.display = showConfig ? 'none' : 'block';
             document.getElementById('config-section').style.display = showConfig ? 'block' : 'none';
@@ -209,37 +216,31 @@
 
         async function saveToCloud() {
             const btn = document.getElementById('save-btn');
-            const hOn = document.getElementById('h-on').value;
-            const hOff = document.getElementById('h-off').value;
-            btn.innerText = "⏳ Synchronisation...";
+            btn.innerText = "⏳...";
             try {
                 const res = await fetch('/api/save-hours', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hourOn: hOn, hourOff: hOff })
+                    body: JSON.stringify({ 
+                        hourOn: document.getElementById('h-on').value, 
+                        hourOff: document.getElementById('h-off').value 
+                    })
                 });
                 if (res.ok) {
-                    btn.innerText = "✅ ENREGISTRÉ";
+                    btn.innerText = "✅";
                     btn.style.background = "#2ecc71";
-                    setTimeout(() => { btn.innerText = "ENREGISTRER LE PLANNING"; btn.style.background = "#3498db"; }, 2000);
+                    setTimeout(() => { btn.innerText = "ENREGISTRER"; btn.style.background = "#3498db"; }, 2000);
                 }
-            } catch (e) { btn.innerText = "ERREUR ❌"; }
+            } catch (e) { btn.innerText = "❌"; }
         }
 
-        // INITIALISATION AU DÉMARRAGE
-        if (!isConfigured) {
-            toggleView(true);
-        } else {
-            // Charger les IDs dans les champs de config pour l'utilisateur
+        if (!isConfigured) { toggleView(true); } 
+        else {
             document.getElementById('cfg-id').value = localStorage.getItem('tuya_id');
             document.getElementById('cfg-dev').value = localStorage.getItem('tuya_device');
-            
-            // Premier appel et boucle de rafraîchissement (30 sec)
             fetchDeviceStatus();
             setInterval(() => fetchDeviceStatus(true), 30000);
         }
-
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
